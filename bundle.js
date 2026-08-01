@@ -1,5 +1,5 @@
 /* ============================================================================
-   AssetTrace: The Handover Quest — v2.0
+   AssetIdent: The Handover Quest — v2.0
    80s retro platformer that gamifies the FM "Handover Gap".
 
    v2.0 changes (P0 + P1):
@@ -151,7 +151,7 @@
       const v = params.get("utm_" + k);
       if (v) utm[k] = v;
     });
-    const apiBase = params.get("api") || (window.ASSETTRACE_API || "");
+    const apiBase = params.get("api") || (window.ASSETIDENT_API || "");
     const debug = params.get("debug") === "1";
     const sessionId = "at-" + Math.random().toString(36).slice(2, 10);
 
@@ -170,9 +170,9 @@
           }).catch(() => {});
         } catch (e) { /* ignore */ }
       }
-      window.assetTraceEvents = window.assetTraceEvents || [];
-      window.assetTraceEvents.push({ event, payload });
-      if (debug) console.log("[AssetTrace]", event, payload);
+      window.assetIdentEvents = window.assetIdentEvents || [];
+      window.assetIdentEvents.push({ event, payload });
+      if (debug) console.log("[AssetIdent]", event, payload);
       const cb = window._atCb && window._atCb[event];
       if (cb) { try { cb(payload); } catch (e) { /* ignore */ } }
     }
@@ -2675,7 +2675,7 @@
       ? hs.map((h, i) => `<div><span class="at-rank">${i + 1}.</span>${esc(h.initials)}<span class="at-badge at-badge--${h.rank || "D"}">${esc(h.rank || "-")}</span><span class="at-sc">${h.score}</span></div>`).join("")
       : `<div class="at-dim">--- keine einträge ---</div>`;
     showOverlay(`
-      <h1>ASSETTRACE</h1>
+      <h1>ASSETIDENT</h1>
       <h2>THE HANDOVER QUEST</h2>
       <p class="at-dim">// FM DATA CAPTURE PROTOCOL v${CFG.VERSION} //</p>
       <p>3 Ebenen, ${TOTAL_ASSETS} Anlagen, ein Übergabetermin.</p>
@@ -3053,7 +3053,7 @@
       <div id="at-hs-area"></div>
       </div>
       <div class="at-rep-foot">
-        <a class="at-btn" href="${landingURL()}" target="_blank" rel="noopener">ASSETTRACE LIVE ANSEHEN &raquo;</a>
+        <a class="at-btn" href="${landingURL()}" target="_blank" rel="noopener">ASSETIDENT LIVE ANSEHEN &raquo;</a>
         <button class="at-btn at-btn--ghost" id="at-replay">NOCHMAL</button>
         ${failed ? `<button class="at-btn at-btn--ghost" id="at-retry">EBENE WIEDERHOLEN</button>` : ""}
         <button class="at-btn at-btn--ghost at-btn--sm" id="at-page1">&laquo; BEFUND</button>
@@ -3097,11 +3097,11 @@
   }
 
   function landingURL() {
-    const base = window.ASSETTRACE_LANDING || "https://assettrace.example.com";
+    const base = window.ASSETIDENT_LANDING || "https://assetident.example.com";
     const q = [];
     if (Tracking.utm.source) q.push("utm_source=" + encodeURIComponent(Tracking.utm.source));
     if (Tracking.utm.campaign) q.push("utm_campaign=" + encodeURIComponent(Tracking.utm.campaign));
-    q.push("at_rank=" + (Game.report ? Game.report.rank : "-"));
+    q.push("ai_rank=" + (Game.report ? Game.report.rank : "-"));
     return base + (base.indexOf("?") >= 0 ? "&" : "?") + q.join("&");
   }
 
@@ -3261,7 +3261,7 @@
     setStatus("SYSTEM READY");
     requestAnimationFrame(frame);
 
-    window.AssetTrace = {
+    window.AssetIdent = {
       version: CFG.VERSION,
       start: () => startRun(true),
       startNoPrologue: () => startRun(false),

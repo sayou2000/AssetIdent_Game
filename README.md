@@ -1,6 +1,6 @@
-# AssetTrace: The Handover Quest 🕹️  v2.0
+# AssetIdent: The Handover Quest 🕹️  v2.0
 
-Ein **80er-Retro-Arcade-Spiel** im Browser für AssetTrace. Es macht den realen
+Ein **80er-Retro-Arcade-Spiel** im Browser für AssetIdent. Es macht den realen
 **Handover Gap** im Facility Management spielbar: der Spieler ist Tech Inspector,
 erfasst Anlagen gegen einen laufenden Übergabetermin und verwandelt visuelle
 Daten in strukturierte, CAFM-fähige FM-Daten.
@@ -9,7 +9,7 @@ Daten in strukturierte, CAFM-fähige FM-Daten.
 - **Keine externen Assets** — Pixelgrafik und Chiptune werden zur Laufzeit erzeugt.
 - **~130 KB gesamt.** Lädt sofort, läuft offline, überall einbettbar.
 - **Desktop + Mobile** (Touch-Steuerung wird automatisch erkannt).
-- **Einbettbar** per `<iframe>` oder `<assettrace-game>` Web Component in jedes CMS.
+- **Einbettbar** per `<iframe>` oder `<assetident-game>` Web Component in jedes CMS.
 
 ## Was v2.0 gegenüber v1 ändert
 
@@ -36,7 +36,7 @@ nichts. v2.0 macht daraus ein Spiel:
 ## 1. Project structure
 
 ```
-AssetTrace_Game/
+AssetIdent_Game/
 ├── index.html          # Game shell: canvas, HUD, overlays, touch controls
 ├── style.css           # 80s CRT styling (scanlines, palette, retro UI)
 ├── bundle.js           # Full game: engine + audio synth + procedural art + mechanics
@@ -181,10 +181,10 @@ docker compose up -d --build
 # → http://localhost:8080
 
 # Or a one-shot docker run
-docker build -t assettrace/handover-quest:2.0.0 .
-docker run -d -p 8080:8080 --name assettrace-game --read-only --tmpfs /tmp \
+docker build -t assetident/handover-quest:2.0.0 .
+docker run -d -p 8080:8080 --name assetident-game --read-only --tmpfs /tmp \
   --security-opt no-new-privileges:true --memory=128m \
-  assettrace/handover-quest:2.0.0
+  assetident/handover-quest:2.0.0
 ```
 
 ### Vor dem ersten Deploy
@@ -231,7 +231,7 @@ CMS that allows iframes. See [`embed.html`](embed.html) for a live demo.
 ```html
 <iframe
   src="https://YOUR-GAME-HOST/index.html?utm_source=linkedin&utm_campaign=handover"
-  title="AssetTrace: The Handover Quest"
+  title="AssetIdent: The Handover Quest"
   loading="lazy" allow="autoplay; fullscreen"
   style="width:100%;max-width:960px;height:480px;border:0;background:#000;"
   allowfullscreen></iframe>
@@ -244,7 +244,7 @@ out of the critical path. Recommended iframe height: **480 px** (or any 16:9 rat
 
 ```html
 <script>
-customElements.define('assettrace-game', class extends HTMLElement {
+customElements.define('assetident-game', class extends HTMLElement {
   connectedCallback() {
     const src = this.getAttribute('src') || 'index.html';
     const p = ['source','medium','campaign','content','term']
@@ -260,11 +260,11 @@ customElements.define('assettrace-game', class extends HTMLElement {
 });
 </script>
 
-<assettrace-game
+<assetident-game
   src="https://YOUR-GAME-HOST/index.html"
   utm-source="linkedin"
   utm-campaign="handover">
-</assettrace-game>
+</assetident-game>
 ```
 
 ### WordPress specific
@@ -286,8 +286,8 @@ https://YOUR-GAME-HOST/index.html?utm_source=linkedin&utm_medium=social&utm_camp
 ### Events emitted
 Each significant action fires an event three ways (best-effort, non-blocking):
 
-1. **`navigator.sendBeacon`** / `fetch` POST to `window.ASSETTRACE_API` (set before the script loads — see below) or `?api=<url>`.
-2. **`window.assetTraceEvents`** array inside the iframe (parent can read it via `contentWindow`).
+1. **`navigator.sendBeacon`** / `fetch` POST to `window.ASSETIDENT_API` (set before the script loads — see below) or `?api=<url>`.
+2. **`window.assetIdentEvents`** array inside the iframe (parent can read it via `contentWindow`).
 3. Logged to the console when running in `?debug=1`.
 
 | Event | Wann | Payload |
@@ -312,7 +312,7 @@ und `run_complete.rank` als Funnel-Stufe.
 Set the endpoint globally before `bundle.js` loads (e.g. in `index.html`):
 
 ```html
-<script>window.ASSETTRACE_API = "https://api.yourdomain.com/v1/game/events";</script>
+<script>window.ASSETIDENT_API = "https://api.yourdomain.com/v1/game/events";</script>
 <script src="bundle.js"></script>
 ```
 
@@ -323,21 +323,21 @@ the raw body). For richer server-side handling, drop `mode: "no-cors"` in `bundl
 
 ### CTA-Landing-URL setzen — PFLICHT VOR DEM LIVEGANG
 
-Der CTA „ASSETTRACE LIVE ANSEHEN" auf Report-Seite 2 zeigt auf
-`window.ASSETTRACE_LANDING`. Vorgabe ist die **Beispiel-Domain**
-`https://assettrace.example.com` und damit ein toter Link. Angehängt werden
-`utm_source`, `utm_campaign` und `at_rank=<Rang>`, sodass die Attribution bis zur
+Der CTA „ASSETIDENT LIVE ANSEHEN" auf Report-Seite 2 zeigt auf
+`window.ASSETIDENT_LANDING`. Vorgabe ist die **Beispiel-Domain**
+`https://assetident.example.com` und damit ein toter Link. Angehängt werden
+`utm_source`, `utm_campaign` und `ai_rank=<Rang>`, sodass die Attribution bis zur
 Anmeldung durchläuft — inklusive der Information, wie gut der Besucher gespielt hat.
 
 Die Variable steht im obersten `<script>`-Block von `index.html`:
 
 ```html
-<script>window.ASSETTRACE_LANDING = "https://deine-landingpage.de";</script>
+<script>window.ASSETIDENT_LANDING = "https://deine-landingpage.de";</script>
 ```
 
 Warum dort und nicht als Umgebungsvariable: Der Container liefert ausschließlich
 statische Dateien aus, niemand ersetzt zur Laufzeit etwas im HTML. Eine
-`ASSETTRACE_LANDING`-Variable im Compose — so stand es hier früher — ist wirkungslos.
+`ASSETIDENT_LANDING`-Variable im Compose — so stand es hier früher — ist wirkungslos.
 
 ---
 
@@ -445,7 +445,7 @@ schiefgegangen und wurden per Rechnung gefunden, nicht per Auge:
 ### Debug-Modus
 
 `?debug=1` loggt alle Events in die Konsole und legt Testhandles offen:
-`window.AssetTrace._dev = { Game, CFG, LEVELS, beginLevel, startPrologue, endRun }`.
+`window.AssetIdent._dev = { Game, CFG, LEVELS, beginLevel, startPrologue, endRun }`.
 Damit lässt sich jede Szene direkt anspringen (z. B. für Screenshots) oder eine
 Ebene ohne Vorlauf starten.
 
@@ -481,7 +481,7 @@ mobile browsers. Requires `AudioContext` (universal since 2020) and `canvas` (un
 
 ## 10. License & credits
 
-MIT License — freie Verwendung für die AssetTrace-Kampagne.
+MIT License — freie Verwendung für die AssetIdent-Kampagne.
 
 Konzept: der **Handover Gap** im Facility Management als Arcade-Spiel — unlesbare
 Typenschilder, fehlendes Licht, verbaute Anlagen, Dampf, Instandhaltungsstau und

@@ -3,35 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="description" content="AssetTrace: The Handover Quest - 80s Retro-Arcade zum Handover Gap im Facility Management. Typenschilder, Prüffristen, DIN 276, ESG - gegen die Uhr." />
-  <title>AssetTrace: The Handover Quest</title>
+  <meta name="description" content="AssetIdent: The Handover Quest - 80s Retro-Arcade zum Handover Gap im Facility Management. Typenschilder, Prüffristen, DIN 276, ESG - gegen die Uhr." />
+  <title>AssetIdent: The Handover Quest</title>
 
   <!-- ══════════════════════════════════════════════════════════════════════
        HIER EINTRAGEN, BEVOR DAS SPIEL ONLINE GEHT
        ──────────────────────────────────────────────────────────────────────
-       1. ASSETTRACE_LANDING  Ziel des "ASSETTRACE LIVE ANSEHEN"-Buttons im
+       1. ASSETIDENT_LANDING  Ziel des "ASSETIDENT LIVE ANSEHEN"-Buttons im
           Abschlussbildschirm. Das ist der einzige Conversion-Punkt des ganzen
           Spiels — steht hier die Beispiel-Domain, verpufft die Kampagne.
        2. OG_URL unten        die öffentliche Adresse des Spiels (für Vorschau-
           karten in LinkedIn/Slack/WhatsApp).
        ══════════════════════════════════════════════════════════════════════ -->
   <script>
-    window.ASSETTRACE_LANDING = "https://assettrace.example.com";  // ← ÄNDERN
+    window.ASSETIDENT_LANDING = "https://assetident.example.com";  // ← ÄNDERN
     // Optional: Analytics-Endpunkt, der alle Spielereignisse per POST bekommt.
-    // window.ASSETTRACE_API = "https://api.deine-domain.de/v1/game/events";
+    // window.ASSETIDENT_API = "https://api.deine-domain.de/v1/game/events";
   </script>
 
   <!-- Vorschaukarte beim Teilen (LinkedIn, Slack, WhatsApp, X) -->
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="AssetTrace" />
-  <meta property="og:title" content="AssetTrace: The Handover Quest" />
+  <meta property="og:site_name" content="AssetIdent" />
+  <meta property="og:title" content="AssetIdent: The Handover Quest" />
   <meta property="og:description" content="Typenschilder im Dunkeln, verbaute Anlagen, DIN 276 unter Zeitdruck — das Retro-Arcade-Spiel zum Handover Gap im Facility Management." />
   <meta property="og:image" content="og-image.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:locale" content="de_DE" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="AssetTrace: The Handover Quest" />
+  <meta name="twitter:title" content="AssetIdent: The Handover Quest" />
   <meta name="twitter:description" content="Schaffst du die Übergabe, bevor der Termin dich schafft? 3 Ebenen, 17 Anlagen, eine Uhr, die rückwärts läuft." />
   <meta name="twitter:image" content="og-image.png" />
   <!-- Favicon als Inline-SVG: keine zusätzliche Datei, kein zusätzlicher Request,
@@ -48,19 +48,19 @@
 </head>
 <body>
   <!--
-    AssetTrace: The Handover Quest  v2.0
+    AssetIdent: The Handover Quest  v2.0
     Embeddable, dependency-free 80s retro arcade game.
 
     URL params supported:
       ?utm_source=linkedin&utm_campaign=handover
       ?hs=0       -> reset local highscore
-      ?debug=1    -> console event log + window.AssetTrace._dev
+      ?debug=1    -> console event log + window.AssetIdent._dev
       ?api=<url>  -> POST analytics endpoint
   -->
 
   <div id="at-game-root">
     <div id="at-stage">
-      <canvas id="at-canvas" width="480" height="270" aria-label="AssetTrace The Handover Quest game"></canvas>
+      <canvas id="at-canvas" width="480" height="270" aria-label="AssetIdent The Handover Quest game"></canvas>
 
       <!-- CRT scanline + vignette overlay -->
       <div id="at-crt-overlay" aria-hidden="true"></div>

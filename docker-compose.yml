@@ -1,13 +1,13 @@
-# AssetTrace: The Handover Quest — docker-compose
+# AssetIdent: The Handover Quest — docker-compose
 # Lokal:   docker compose up -d --build   →   http://localhost:8080
 # Coolify: als "Docker Compose"-Ressource auf dieses Verzeichnis zeigen,
 #          Domain vergeben, Port 8080 als exposed port eintragen.
 
 services:
-  assettrace-game:
+  assetident-game:
     build: .
-    image: assettrace/handover-quest:2.0.0
-    container_name: assettrace-game
+    image: assetident/handover-quest:2.0.0
+    container_name: assetident-game
     restart: unless-stopped
 
     ports:
@@ -16,7 +16,7 @@ services:
     # Die Landing-URL des CTA und der optionale Analytics-Endpunkt stehen in
     # index.html (oberster <script>-Block). Eine Umgebungsvariable brächte hier
     # nichts: der Container liefert nur statische Dateien aus, niemand ersetzt zur
-    # Laufzeit etwas im HTML. Vorher stand hier eine ASSETTRACE_LANDING-Variable,
+    # Laufzeit etwas im HTML. Vorher stand hier eine ASSETIDENT_LANDING-Variable,
     # die schlicht wirkungslos war.
 
     healthcheck:

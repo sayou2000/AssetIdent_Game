@@ -45,7 +45,7 @@ AssetIdent_Game/
 ├── security-headers.conf # Header-Snippet, in jede nginx-location eingebunden
 ├── Dockerfile          # nginx:alpine static host (~10 MB image)
 ├── docker-compose.yml  # One-command deploy
-├── nginx.conf          # Hardened static server config (CSP-ready, gzip, caching)
+├── nginx.conf          # Static server config (gzip, revalidierendes Caching, Routen)
 ├── .dockerignore
 └── README.md
 ```
@@ -193,10 +193,20 @@ Vier Dinge, die sonst still schiefgehen:
 
 1. **CTA-URL setzen** (§6). Vorgabe ist die Beispiel-Domain — der einzige
    Marketing-Button des Spiels führt sonst ins Leere.
-2. **`?v=` bei jedem Release mitziehen.** `bundle.js` und `style.css` tragen keinen
-   Inhalts-Hash und werden ein Jahr lang `immutable` ausgeliefert; `index.html`
-   referenziert sie mit `?v=2.0.0`. Wird die Version nicht erhöht, bekommen
-   wiederkehrende Besucher die alte Fassung — der Deploy ist grün und ändert nichts.
+2. **Caching ist ab v2.0.1 revalidierend.** `bundle.js` und `style.css` gehen mit
+   `Cache-Control: no-cache` raus, der Browser prüft sie also per ETag bei jedem
+   Aufruf gegen (Antwort im Normalfall ein 304 mit ein paar hundert Byte).
+
+   Davor standen sie ein Jahr lang auf `immutable` und die Korrektheit hing daran,
+   dass jemand bei jedem Release das `?v=` in `index.html` mitzieht. Das ging beim
+   ersten Release prompt schief: der Deploy war grün, der Server hatte die neue
+   Datei, aber alle Browser, die schon einmal da waren, fragten wegen `immutable`
+   nicht einmal mehr nach. Ein Bundle von ~150 KB ist diese Fehlerklasse nicht wert.
+
+   Das `?v=` bleibt als Sicherheitsnetz: es macht einen Release im Netzwerk-Tab
+   sichtbar und umgeht notfalls einen bereits vergifteten Cache-Eintrag. Beim
+   Hochzählen zusammenhalten: `CFG.VERSION`, beide `?v=` in `index.html`, das
+   `LABEL` im Dockerfile und der Image-Tag in `docker-compose.yml`.
 3. **`read_only` braucht Schreibflächen.** nginx legt `/var/run/nginx.pid` an und
    nutzt die temp-Verzeichnisse unter `/var/cache/nginx`; beide sind in
    `docker-compose.yml` als tmpfs eingehängt. Fehlen sie, startet der Container gar

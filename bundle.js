@@ -88,7 +88,7 @@
     BUILDING_ASSETS: 400,
     FIELDS_PER_RECORD: 8,
 
-    VERSION: "2.0.0",
+    VERSION: "2.0.1",
     HS_KEY: "at_handover_hs_v2",
   };
 

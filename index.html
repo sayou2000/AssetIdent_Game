@@ -39,11 +39,14 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230B192C'/%3E%3Cpath d='M6 19a10 10 0 0 1 20 0z' fill='%23FF6B00'/%3E%3Cg fill='%230B192C'%3E%3Crect x='6' y='13' width='20' height='1'/%3E%3Crect x='6' y='15.5' width='20' height='1.5'/%3E%3C/g%3E%3Cg stroke='%2322D3EE' stroke-width='1.4' fill='none'%3E%3Cpath d='M4 22h24'/%3E%3Cpath d='M8 26h4M20 26h4'/%3E%3C/g%3E%3C/svg%3E" />
   <meta name="theme-color" content="#0B192C" />
 
-  <!-- Der Versionsparameter bricht den Browser-Cache auf. bundle.js und style.css
-       tragen keinen Inhalts-Hash im Namen und werden ein Jahr lang immutable
-       ausgeliefert — ohne ?v= bekämen wiederkehrende Besucher nach einem Update
-       weiterhin die alte Fassung. Bei jedem Release mitziehen (= CFG.VERSION). -->
-  <link rel="stylesheet" href="style.css?v=2.0.0" />
+  <!-- Der Versionsparameter ist nur noch ein Sicherheitsnetz, nicht mehr die
+       eigentliche Absicherung: nginx lässt bundle.js und style.css seit v2.0.1 bei
+       jedem Aufruf per ETag gegenprüfen (siehe nginx.conf). Vorher waren sie ein
+       Jahr lang `immutable` — und genau einmal vergessen, das ?v= mitzuziehen,
+       reichte, damit wiederkehrende Besucher dauerhaft die alte Fassung sahen.
+       Mitzählen schadet trotzdem nicht: es macht einen Release im Netzwerk-Tab
+       sichtbar und umgeht notfalls einen bereits vergifteten Cache-Eintrag. -->
+  <link rel="stylesheet" href="style.css?v=2.0.1" />
   <!-- No external fonts: built-in monospace mimics 8-bit terminal feel (zero runtime CDN requests). -->
 </head>
 <body>
@@ -102,6 +105,6 @@
     </div>
   </div>
 
-  <script src="bundle.js?v=2.0.0"></script>
+  <script src="bundle.js?v=2.0.1"></script>
 </body>
 </html>

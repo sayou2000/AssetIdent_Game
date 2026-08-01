@@ -6,7 +6,7 @@
 services:
   assetident-game:
     build: .
-    image: assetident/handover-quest:2.0.0
+    image: assetident/handover-quest:2.0.1
     container_name: assetident-game
     restart: unless-stopped
 

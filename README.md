@@ -302,6 +302,7 @@ Each significant action fires an event three ways (best-effort, non-blocking):
 | `level_complete` | Ebene geschafft | `level`, `time_left`, `bonus`, `score` |
 | `run_complete` | Lauf endet (geschafft **oder** Timeout) | `reason`, `rank`, `handover`, `score`, `captured`, `total`, `good`, `bad`, `elapsed_s`, `best_combo`, `co2e`, `saved_hours` |
 | `highscore` | Initialen gespeichert | `entry`, `board` |
+| `contact_click` | Klick auf den LinkedIn-Credit | `from` (Spielzustand, aus dem geklickt wurde) |
 
 Für die Kampagnen-Auswertung sind vor allem interessant: `prologue_done.seconds`
 (wie lange Besucher wirklich für ein Feld brauchen), `task_answer.correct` je

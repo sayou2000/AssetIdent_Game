@@ -369,6 +369,41 @@ html, body {
 
 .at-btn--sm { font-size: 0.8em !important; padding: 4px 10px !important; margin-top: 4px !important; }
 
+/* ============================================================
+   Kontakt-Credit — bewusst zurückhaltend: kein Button, keine
+   Konkurrenz zum eigentlichen CTA. Erst beim Hovern wird er hell.
+   ============================================================ */
+.at-creditline {
+  margin-top: 10px !important;
+  font-size: 0.8em;
+  color: var(--at-dim);
+  letter-spacing: 1px;
+}
+.at-credit {
+  color: var(--at-dim);
+  text-decoration: none;
+  border-bottom: 1px dotted currentColor;
+  padding-bottom: 1px;
+  white-space: nowrap;
+  transition: color 0.12s;
+}
+.at-credit:hover, .at-credit:focus-visible {
+  color: var(--at-cyan);
+  border-bottom-style: solid;
+}
+/* LinkedIn-Kürzel als kleine Terminal-Kachel statt fremdem Markenlogo */
+.at-in {
+  display: inline-block;
+  border: 1px solid currentColor;
+  padding: 0 3px;
+  margin-right: 6px;
+  font-size: 0.9em;
+  line-height: 1.3;
+  text-transform: lowercase;
+  font-weight: bold;
+}
+.at-credit:hover .at-in { background: var(--at-cyan); color: #0B192C; }
+
 .at-keypad {
   display: grid; grid-template-columns: repeat(5, 1fr);
   gap: 5px; max-width: 260px; margin: 8px auto 0;

@@ -92,6 +92,17 @@
     HS_KEY: "at_handover_hs_v2",
   };
 
+  /**
+   * Kontakt. Bewusst kein Formular und kein Impressumsblock — nur ein Credit-Link,
+   * wie ihn Automatenspiele der Ära im Attract-Screen hatten ("© 1987 KONAMI").
+   * Erscheint an genau zwei Stellen: auf dem Titelbildschirm (sieht jeder) und
+   * unter dem Abschluss-CTA (Moment mit der höchsten Aufmerksamkeit).
+   */
+  const CONTACT = {
+    name: "ANDREAS SANKOVITSCH",
+    url: "https://www.linkedin.com/in/andreas-sankovitsch-336077288",
+  };
+
   const PAL = {
     bg0: "#0B192C", bg1: "#13294b", bg2: "#1E3A8A",
     pipe: "#2b3a55", pipeHi: "#4c6b9c", pipeLo: "#15212f",
@@ -2622,9 +2633,22 @@
 
   function setStatus(t) { if (elStatus) elStatus.textContent = t; }
 
+  /** Dezenter Kontakt-Link im Automaten-Credit-Stil. */
+  function creditLink(label) {
+    return `<a class="at-credit" href="${CONTACT.url}" target="_blank"
+      rel="noopener noreferrer" data-credit="1"
+      ><span class="at-in">in</span>${esc(label || CONTACT.name)}</a>`;
+  }
+
   function showOverlay(html, cls) {
     panel.className = "at-panel" + (cls ? " " + cls : "");
     panel.innerHTML = html;
+    // zentral verdrahtet, damit jeder Credit-Link automatisch gezählt wird —
+    // sonst vergisst man es beim nächsten Panel
+    if (panel.querySelectorAll) {
+      panel.querySelectorAll("[data-credit]").forEach(a =>
+        a.addEventListener("click", () => Tracking.send("contact_click", { from: Game.state })));
+    }
     overlay.classList.add("at-overlay--visible");
   }
   function hideOverlay() {
@@ -2692,6 +2716,7 @@
       <button class="at-btn at-btn--ghost" id="at-skip">PROLOG ÜBERSPRINGEN</button>
       <p class="at-dim" style="margin-top:8px">BESTENLISTE</p>
       <div class="at-hs-list">${hsHTML}</div>
+      <p class="at-creditline">EIN PROJEKT VON ${creditLink()}</p>
     `);
     el("at-start").onclick = () => startRun(true);
     el("at-skip").onclick = () => startRun(false);
@@ -3057,6 +3082,7 @@
         <button class="at-btn at-btn--ghost" id="at-replay">NOCHMAL</button>
         ${failed ? `<button class="at-btn at-btn--ghost" id="at-retry">EBENE WIEDERHOLEN</button>` : ""}
         <button class="at-btn at-btn--ghost at-btn--sm" id="at-page1">&laquo; BEFUND</button>
+        <p class="at-creditline">Fragen zur Erfassung im Bestand? ${creditLink()}</p>
       </div>
     `, "at-panel--report");
 

@@ -1,0 +1,534 @@
+/* ============================================================
+   AssetTrace: The Handover Quest  -  Retro 80s CRT styling
+   Palette: #0B192C / #1E3A8A (deep blues), #FF6B00 (orange)
+   ============================================================ */
+
+:root {
+  --at-bg:        #0B192C;
+  --at-bg2:       #1E3A8A;
+  --at-orange:    #FF6B00;
+  --at-orange-d:  #C24E00;
+  --at-cyan:      #22D3EE;
+  --at-green:     #34D399;
+  --at-red:       #EF4444;
+  --at-text:      #E2E8F0;
+  --at-dim:       #8b98ad;
+  --at-pixel:     Consolas, "DejaVu Sans Mono", "Liberation Mono", Menlo,
+                  "Lucida Console", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #05070D;
+  color: var(--at-text);
+  font-family: var(--at-pixel);
+  overflow: hidden;
+  height: 100%;
+  /* The retro pixel look now comes from the real bitmap font on the canvas, so the
+     DOM panels are allowed to be smooth and readable instead of hard-aliased. */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#at-game-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(30, 58, 138, 0.45) 0%, rgba(11, 25, 44, 0.85) 55%, #05070D 100%);
+}
+
+/* ---- Stage / canvas wrapper ---- */
+#at-stage {
+  position: relative;
+  width: min(96vw, 96vh * (480 / 270));
+  aspect-ratio: 480 / 270;
+  max-width: 960px;
+  background: #000;
+  border: 2px solid var(--at-orange);
+  box-shadow:
+    0 0 0 2px #000,
+    0 0 24px rgba(255, 107, 0, 0.35),
+    inset 0 0 32px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+}
+
+#at-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: var(--at-bg);
+}
+
+/* CRT scanlines + vignette */
+#at-crt-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.18) 3px,
+      rgba(0, 0, 0, 0.18) 4px
+    ),
+    radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.55) 100%);
+  mix-blend-mode: multiply;
+  z-index: 5;
+}
+
+/* ---- HUD ---- */
+.at-hud {
+  position: absolute;
+  top: 6px; left: 6px; right: 6px;
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: clamp(9px, 2.3vw, 14px);
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px 0 #000, 2px 2px 0 rgba(0,0,0,0.6);
+  z-index: 6;
+  pointer-events: none;
+}
+.at-hud-cell {
+  background: rgba(11, 25, 44, 0.7);
+  border: 1px solid var(--at-orange-d);
+  padding: 2px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 52px;
+  line-height: 1.1;
+}
+.at-label { color: var(--at-cyan); font-size: 0.8em; font-weight: normal; }
+#at-level, #at-score, #at-data, #at-qual, #at-time { color: var(--at-orange); font-weight: bold; }
+.at-hud-cell--time { border-color: var(--at-orange); min-width: 68px; }
+
+/* ---- Overlays (title / win / classification) ---- */
+.at-overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 7, 13, 0.86);
+  z-index: 8;
+  text-align: center;
+  padding: 12px;
+}
+.at-overlay--visible { display: flex; }
+
+.at-panel {
+  max-width: 94%;
+  font-size: clamp(11px, 2.8vw, 16px);
+  line-height: 1.5;
+  letter-spacing: 0.5px;
+}
+.at-panel h1 {
+  font-size: clamp(16px, 5.2vw, 34px);
+  margin: 0 0 4px;
+  color: var(--at-orange);
+  text-shadow:
+    0 0 10px rgba(255, 107, 0, 0.7),
+    3px 3px 0 #000,
+    -1px -1px 0 var(--at-cyan);
+  letter-spacing: 2px;
+  animation: at-glow 1.6s ease-in-out infinite alternate;
+}
+.at-panel h2 {
+  font-size: clamp(12px, 3.4vw, 20px);
+  margin: 6px 0 10px;
+  color: var(--at-cyan);
+  text-shadow: 2px 2px 0 #000;
+}
+.at-panel p { margin: 4px 0; color: var(--at-text); }
+.at-panel .at-dim { color: var(--at-dim); font-size: 0.9em; }
+.at-panel .at-orange { color: var(--at-orange); }
+.at-panel .at-green  { color: var(--at-green); }
+.at-panel .at-cyan   { color: var(--at-cyan); }
+.at-panel .at-red    { color: var(--at-red); }
+.at-panel .at-yellow { color: #FACC15; }
+.at-tiny { font-size: 0.85em; line-height: 1.45; }
+.at-h1-fail { color: var(--at-red) !important; }
+
+/* Long panels: the content scrolls, the action row stays pinned. Without this the
+   "next" button and the CTA slip below the fold of a 16:9 stage on small windows. */
+.at-panel--task { max-height: 100%; overflow-y: auto; overscroll-behavior: contain; }
+.at-panel--report {
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.at-rep-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+}
+.at-rep-foot {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--at-orange-d);
+  margin-top: 6px;
+  padding-top: 2px;
+}
+.at-rep-foot .at-btn { margin-top: 8px; }
+.at-rep-body::-webkit-scrollbar { width: 6px; }
+.at-rep-body::-webkit-scrollbar-thumb { background: var(--at-orange-d); }
+.at-rep-body::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+
+.at-keys {
+  display: inline-block;
+  border: 1px solid var(--at-orange);
+  padding: 1px 5px;
+  margin: 0 1px;
+  color: var(--at-orange);
+  background: rgba(255, 107, 0, 0.08);
+  font-size: 0.9em;
+}
+
+.at-btn {
+  font-family: var(--at-pixel);
+  font-size: clamp(11px, 3vw, 16px);
+  letter-spacing: 2px;
+  color: #0B192C;
+  background: var(--at-orange);
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0 #000, inset 1px 1px 0 rgba(255,255,255,0.35);
+  padding: 8px 18px;
+  margin: 10px 6px 0;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: bold;
+  transition: transform 0.05s;
+  text-decoration: none;          /* the CTA is an <a> — no underline */
+  display: inline-block;
+}
+.at-btn:hover { background: var(--at-cyan); }
+.at-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #000; }
+.at-btn--ghost {
+  background: transparent;
+  color: var(--at-cyan);
+  box-shadow: 3px 3px 0 #000;
+  border-color: var(--at-cyan);
+}
+.at-btn--ghost:hover { background: rgba(34, 211, 238, 0.12); color: var(--at-cyan); }
+
+/* ============================================================
+   Knowledge-task terminal (DIN 276 / Zähler / Prüffrist / ESG)
+   ============================================================ */
+.at-terminal {
+  border: 2px solid var(--at-orange);
+  background: rgba(11, 25, 44, 0.96);
+  padding: 8px 12px 10px;
+  box-shadow: 4px 4px 0 #000;
+  text-align: left;
+}
+.at-term-head { font-size: 0.85em; margin-bottom: 3px; }
+.at-terminal h2 { margin: 2px 0 6px; text-align: left; }
+.at-ask { margin: 8px 0 6px !important; color: var(--at-orange) !important; }
+
+/* AI-extracted nameplate fields */
+.at-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px 14px;
+  font-size: 0.9em;
+  border-left: 2px solid var(--at-cyan);
+  padding-left: 8px;
+  margin: 4px 0 6px;
+}
+.at-fields > div { display: flex; justify-content: space-between; gap: 8px; }
+
+/* answer options */
+.at-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.at-opts--2 { grid-template-columns: 1fr 1fr; }
+.at-opt {
+  font-family: var(--at-pixel);
+  font-size: clamp(11px, 2.5vw, 14px);
+  text-align: left;
+  color: var(--at-text);
+  background: rgba(30, 58, 138, 0.35);
+  border: 1px solid var(--at-cyan);
+  box-shadow: 2px 2px 0 #000;
+  padding: 6px 8px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+.at-opt b { color: var(--at-orange); margin-right: 5px; }
+.at-opt:hover { background: var(--at-cyan); color: #0B192C; }
+.at-opt:hover b { color: #0B192C; }
+.at-opt:active { transform: translate(2px, 2px); box-shadow: 0 0 0 #000; }
+
+.at-timer-bar {
+  height: 6px; width: 100%;
+  background: #1b2a44; margin-top: 8px;
+  border: 1px solid var(--at-orange-d);
+  overflow: hidden;
+}
+.at-timer-fill {
+  height: 100%; width: 100%;
+  background: linear-gradient(90deg, var(--at-orange), var(--at-cyan));
+}
+
+/* meter digit rolls */
+.at-meter {
+  display: flex; align-items: center; gap: 2px;
+  margin: 6px 0; justify-content: center;
+}
+.at-roll {
+  background: #0B0F18; color: #E2E8F0;
+  border: 1px solid #6b82a8;
+  font-size: clamp(14px, 4vw, 22px);
+  width: 1.1em; text-align: center;
+  box-shadow: inset 0 -3px 6px rgba(0,0,0,0.7), inset 0 3px 4px rgba(255,255,255,0.12);
+}
+.at-roll--red { background: #7f1d1d; border-color: var(--at-red); }
+.at-unit { color: var(--at-cyan); margin-left: 6px; font-size: 0.9em; }
+
+/* inspection sticker */
+.at-plate {
+  display: inline-flex; flex-direction: column; align-items: center;
+  border: 3px solid #0B192C;
+  background: repeating-conic-gradient(#FACC15 0% 25%, #f59e0b 0% 50%) 50% / 12px 12px;
+  color: #0B192C;
+  padding: 4px 14px; margin: 6px auto; border-radius: 50%;
+  min-width: 108px;
+}
+.at-plate-top, .at-plate-bot { font-size: 0.62em; letter-spacing: 0; }
+.at-plate-date { font-size: 1.5em; font-weight: bold; letter-spacing: 1px; }
+
+/* the "why" toast — the educational payload */
+.at-explain {
+  border: 2px solid var(--at-cyan);
+  background: rgba(11, 25, 44, 0.97);
+  box-shadow: 4px 4px 0 #000;
+  padding: 12px 16px;
+  max-width: 30em;
+}
+.at-explain--ok  { border-color: var(--at-green); }
+.at-explain--ok h2 { color: var(--at-green); }
+.at-explain--bad { border-color: var(--at-red); }
+.at-explain--bad h2 { color: var(--at-red); }
+
+/* ============================================================
+   Prologue: manual typing
+   ============================================================ */
+.at-serial {
+  font-size: clamp(18px, 6vw, 34px);
+  letter-spacing: 4px;
+  background: #000;
+  border: 2px solid var(--at-orange);
+  padding: 6px 12px;
+  margin: 8px auto;
+  display: inline-block;
+}
+.at-serial .at-s-ok   { color: var(--at-green); }
+.at-serial .at-s-cur  { color: var(--at-orange); animation: at-blink 0.6s steps(2) infinite; }
+.at-serial .at-s-todo { color: #334155; }
+.at-shake { animation: at-shake 0.18s linear 2; border-color: var(--at-red) !important; }
+
+/* the nameplate the player copies from — must stay legible at every size */
+.at-np {
+  display: inline-block;
+  background: linear-gradient(160deg, #9aa1ad 0%, #7b828f 55%, #656c78 100%);
+  border: 3px solid #4a5058;
+  box-shadow: inset 0 0 0 2px #b6bcc6, 3px 3px 0 #000;
+  color: #10151f;
+  padding: 6px 14px;
+  margin: 8px auto 4px;
+  text-align: left;
+  font-size: 0.95em;
+  min-width: 15em;
+}
+.at-np-brand {
+  font-weight: bold; letter-spacing: 1.5px;
+  border-bottom: 1px solid #4a5058; margin-bottom: 3px; padding-bottom: 2px;
+}
+.at-np-row { display: flex; justify-content: space-between; gap: 14px; font-size: 0.9em; }
+.at-np-sn {
+  margin-top: 4px; padding-top: 3px; border-top: 1px solid #4a5058;
+  font-weight: bold; letter-spacing: 3px; font-size: 1.15em;
+}
+
+.at-btn--sm { font-size: 0.8em !important; padding: 4px 10px !important; margin-top: 4px !important; }
+
+.at-keypad {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 5px; max-width: 260px; margin: 8px auto 0;
+}
+.at-key {
+  font-family: var(--at-pixel); font-size: 18px; font-weight: bold;
+  color: var(--at-orange); background: rgba(11,25,44,0.9);
+  border: 2px solid var(--at-orange-d); box-shadow: 2px 2px 0 #000;
+  padding: 8px 0; cursor: pointer; touch-action: manipulation;
+}
+.at-key:active { background: var(--at-orange); color: #0B192C; }
+
+/* ============================================================
+   Briefing / level complete / report
+   ============================================================ */
+.at-brief-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; margin: 10px 0 4px;
+  font-size: 0.85em;
+  border-top: 1px solid var(--at-orange-d);
+  border-bottom: 1px solid var(--at-orange-d);
+  padding: 6px 0;
+}
+
+.at-rankrow {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  margin: 8px 0;
+}
+.at-rankmeta { text-align: left; font-size: 0.88em; }
+.at-badge {
+  display: inline-block; font-weight: bold;
+  border: 2px solid currentColor; padding: 0 5px; margin: 0 5px;
+  font-size: 0.85em;
+}
+.at-badge--big {
+  font-size: clamp(28px, 9vw, 56px);
+  padding: 2px 16px; margin: 0;
+  box-shadow: 4px 4px 0 #000;
+}
+.at-badge--S { color: #FACC15; text-shadow: 0 0 12px rgba(250,204,21,0.8); }
+.at-badge--A { color: var(--at-green); }
+.at-badge--B { color: var(--at-cyan); }
+.at-badge--C { color: var(--at-orange); }
+.at-badge--D { color: var(--at-red); }
+
+.at-cats {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 2px 16px; font-size: 0.88em; text-align: left;
+  margin: 4px 0 8px;
+}
+.at-cat { display: flex; justify-content: space-between; gap: 6px;
+  border-bottom: 1px dotted #1f2b44; }
+.at-cat-g { font-weight: bold; min-width: 1.6em; text-align: right; }
+
+.at-report-block {
+  border: 1px solid var(--at-orange-d);
+  background: rgba(11, 25, 44, 0.6);
+  padding: 6px 10px; margin: 8px 0; text-align: left;
+}
+.at-report-block--bad { border-color: var(--at-red); }
+.at-report-block--sell { border-color: var(--at-cyan); }
+.at-list { font-size: 0.88em; line-height: 1.5; max-height: 8em; overflow-y: auto; }
+.at-list > div { border-bottom: 1px dotted #1f2b44; }
+
+.at-compare {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; font-size: 0.92em; text-align: center; margin: 8px 0;
+}
+.at-compare > div { flex: 1; }
+.at-arrow { flex: 0 0 auto !important; color: var(--at-orange); font-size: 1.6em; }
+
+.at-initials {
+  font-size: clamp(18px, 6vw, 30px);
+  letter-spacing: 8px;
+  color: var(--at-orange);
+  background: #000;
+  border: 2px solid var(--at-orange);
+  padding: 4px 8px;
+  text-align: center;
+  width: 5.5em;
+  margin: 6px auto;
+}
+.at-hs-list {
+  text-align: left;
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.95em;
+}
+.at-hs-list .at-rank { color: var(--at-cyan); display: inline-block; width: 1.6em; }
+.at-hs-list .at-sc { color: var(--at-orange); float: right; }
+
+/* ---- Touch controls ---- */
+.at-touch { display: none; }
+body.at-touch-device .at-touch {
+  display: block;
+  position: absolute;
+  inset: auto 0 -56px 0;
+  height: 56px;
+  z-index: 7;
+}
+.at-dpad {
+  position: relative;
+  width: 100%; height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+}
+.at-tbtn {
+  font-family: var(--at-pixel);
+  font-weight: bold;
+  color: var(--at-orange);
+  background: rgba(11, 25, 44, 0.82);
+  border: 2px solid var(--at-orange-d);
+  box-shadow: 2px 2px 0 #000;
+  width: 46px; height: 46px;
+  font-size: 14px;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+.at-tbtn:active { background: var(--at-orange); color: #0B192C; }
+.at-tgroup { display: flex; gap: 6px; }
+.at-tbtn--scan { width: auto; padding: 0 16px; color: var(--at-cyan); border-color: var(--at-cyan); }
+.at-tbtn--scan:active { background: var(--at-cyan); color: #0B192C; }
+.at-tbtn--lamp { width: 40px; color: #FACC15; border-color: #a16207; }
+.at-tbtn--lamp:active { background: #FACC15; color: #0B192C; }
+
+/* ---- Footer ---- */
+.at-footer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: clamp(9px, 1.9vw, 12px);
+  letter-spacing: 1px;
+  color: var(--at-dim);
+  z-index: 6;
+}
+#at-status { color: var(--at-green); }
+.at-footer-hint { color: var(--at-dim); }
+.at-blink {
+  color: var(--at-green);
+  animation: at-blink 1s steps(2) infinite;
+}
+
+@keyframes at-glow {
+  from { text-shadow: 0 0 6px rgba(255,107,0,0.5), 3px 3px 0 #000, -1px -1px 0 var(--at-cyan); }
+  to   { text-shadow: 0 0 16px rgba(255,107,0,0.95), 3px 3px 0 #000, -1px -1px 0 var(--at-cyan); }
+}
+@keyframes at-blink { 50% { opacity: 0; } }
+@keyframes at-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* Narrow screens: stack the option grid and shrink the HUD */
+@media (max-width: 560px) {
+  .at-opts, .at-fields, .at-cats { grid-template-columns: 1fr; }
+  .at-hud { font-size: 8px; letter-spacing: 0; }
+  .at-hud-cell { min-width: 0; padding: 1px 3px; }
+  .at-footer-hint { display: none; }
+}

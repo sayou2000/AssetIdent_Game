@@ -1,0 +1,43 @@
+# AssetTrace: The Handover Quest — docker-compose
+# Lokal:   docker compose up -d --build   →   http://localhost:8080
+# Coolify: als "Docker Compose"-Ressource auf dieses Verzeichnis zeigen,
+#          Domain vergeben, Port 8080 als exposed port eintragen.
+
+services:
+  assettrace-game:
+    build: .
+    image: assettrace/handover-quest:2.0.0
+    container_name: assettrace-game
+    restart: unless-stopped
+
+    ports:
+      - "8080:8080"
+
+    # Die Landing-URL des CTA und der optionale Analytics-Endpunkt stehen in
+    # index.html (oberster <script>-Block). Eine Umgebungsvariable brächte hier
+    # nichts: der Container liefert nur statische Dateien aus, niemand ersetzt zur
+    # Laufzeit etwas im HTML. Vorher stand hier eine ASSETTRACE_LANDING-Variable,
+    # die schlicht wirkungslos war.
+
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+    security_opt:
+      - no-new-privileges:true
+
+    # read_only braucht Schreibflächen für nginx, sonst startet der Container nicht:
+    # der Master-Prozess legt /var/run/nginx.pid an und die Worker brauchen die
+    # temp-Verzeichnisse unter /var/cache/nginx. Mit `read_only: true` und nur /tmp
+    # als tmpfs (so stand es hier) scheitert nginx sofort mit
+    #   open() "/var/run/nginx.pid" failed (30: Read-only file system)
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run
+      - /var/cache/nginx
+
+    mem_limit: 128m

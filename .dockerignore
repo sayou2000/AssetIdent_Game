@@ -1,0 +1,38 @@
+# AssetTrace: The Handover Quest — Docker build context filter
+# Keep the image lean: only the static site + server config get copied.
+
+# VCS
+.git
+.gitignore
+.gitattributes
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.sublime-*
+
+# Docs & non-runtime files (not served, don't bloat image)
+# Careful: og-image.png IS served (share card) — never add *.png here.
+README.md
+LICENSE
+docs/
+*.md
+
+# Docker meta (avoid recursive context issues)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Local tooling / deps (project has none, but be safe)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Test / scratch
+embed.html
+*.tmp
+tmp/

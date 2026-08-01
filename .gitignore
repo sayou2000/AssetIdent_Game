@@ -1,0 +1,20 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temporäre Render- und Test-Harnesses (werden bei Bedarf neu erzeugt)
+_shot.html
+_card.html
+_s.html
+_r.html
+*.tmp
+tmp/
+
+# Es gibt bewusst keinen Build-Schritt und keine Abhängigkeiten.
+node_modules/
+npm-debug.log*

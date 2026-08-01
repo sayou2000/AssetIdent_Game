@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AssetTrace Game — Embed Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, system-ui, sans-serif;
+      background: #0b1220; color: #e2e8f0; margin: 0; padding: 24px;
+    }
+    h1 { font-size: 20px; }
+    .note { color: #94a3b8; font-size: 13px; max-width: 760px; line-height: 1.5; }
+    .wrap {
+      max-width: 720px; margin: 16px auto; border: 2px solid #FF6B00;
+      border-radius: 6px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    pre { background: #05070D; color: #22D3EE; padding: 12px; border-radius: 4px; overflow:auto; font-size: 12px; }
+    code { color: #FF6B00; }
+  </style>
+</head>
+<body>
+  <h1>&lt;assettrace-game&gt; Embed Demo</h1>
+  <p class="note">
+    This page demonstrates both supported embed methods for
+    <strong>AssetTrace: The Handover Quest</strong>. The game below runs in a
+    sandboxed iframe with UTM tracking passed through, just like a real CMS
+    embed. The iframe and Web Component are <em>fully responsive</em>.
+  </p>
+
+  <!-- ====================================================================
+       METHOD 1 — standard responsive iframe (works everywhere: WordPress,
+       Webflow, custom HTML, Mailchimp landing pages, etc.)
+       ==================================================================== -->
+  <div class="wrap">
+    <iframe
+      src="index.html?utm_source=demo&utm_medium=embed&utm_campaign=handover"
+      title="AssetTrace: The Handover Quest"
+      loading="lazy"
+      allow="autoplay; fullscreen"
+      style="width:100%; height:480px; border:0; display:block; background:#000;"
+      allowfullscreen></iframe>
+  </div>
+
+  <p class="note" style="text-align:center">↑ Method 1: responsive &lt;iframe&gt;</p>
+
+  <h2 style="margin-top:32px">Method 2 — Web Component (optional)</h2>
+  <p class="note">
+    For a cleaner API, drop in the tiny loader below and use
+    <code>&lt;assettrace-game&gt;</code>. It reads <code>utm</code> attributes
+    and posts events back to the parent page (e.g. for your analytics).
+  </p>
+
+  <!-- Loader turns <assettrace-game> into a managed iframe -->
+  <script>
+    (function () {
+      customElements.define("assettrace-game", class extends HTMLElement {
+        connectedCallback() {
+          const src = this.getAttribute("src") || "index.html";
+          const params = ["source", "medium", "campaign", "content", "term"]
+            .filter(k => this.hasAttribute("utm-" + k))
+            .map(k => "utm_" + k + "=" + encodeURIComponent(this.getAttribute("utm-" + k)))
+            .join("&");
+          const url = src + (params ? "?" + params : "");
+          const frame = document.createElement("iframe");
+          frame.src = url;
+          frame.title = "AssetTrace: The Handover Quest";
+          frame.loading = "lazy";
+          frame.allow = "autoplay; fullscreen";
+          frame.style.cssText = "width:100%;height:480px;border:0;display:block;background:#000;";
+          // relay game events (window.assetTraceEvents) to parent for analytics
+          frame.addEventListener("load", () => {
+            try {
+              const arr = frame.contentWindow.assetTraceEvents || [];
+              console.log("[assettrace-game] events so far:", arr);
+            } catch (e) {}
+          });
+          this.appendChild(frame);
+        }
+      });
+    })();
+  </script>
+
+  <!-- This renders another full game instance via the component -->
+  <div class="wrap">
+    <assettrace-game
+      src="index.html"
+      utm-source="webflow"
+      utm-medium="webcomponent"
+      utm-campaign="handover">
+    </assettrace-game>
+  </div>
+
+  <h2 style="margin-top:32px">Embed Snippet (copy-paste)</h2>
+  <pre>&lt;!-- Option A: iframe (recommended, universal) --&gt;
+&lt;iframe
+  src="https://&lt;your-game-host&gt;/index.html?utm_source=linkedin&amp;utm_campaign=handover"
+  title="AssetTrace: The Handover Quest"
+  loading="lazy" allow="autoplay; fullscreen"
+  style="width:100%;max-width:960px;height:480px;border:0;"
+  allowfullscreen&gt;&lt;/iframe&gt;
+
+&lt;!-- Option B: Web Component (cleaner API + event relay) --&gt;
+&lt;script&gt;
+customElements.define('assettrace-game', class extends HTMLElement{
+  connectedCallback(){
+    const s=this.getAttribute('src')||'index.html';
+    const p=['source','medium','campaign'].filter(k=&gt;this.hasAttribute('utm-'+k))
+      .map(k=&gt;'utm_'+k+'='+encodeURIComponent(this.getAttribute('utm-'+k))).join('&amp;');
+    const f=document.createElement('iframe');
+    f.src=s+(p?'?'+p:''); f.style='width:100%;height:480px;border:0;';
+    f.loading='lazy'; f.allow='autoplay;fullscreen';
+    this.appendChild(f);
+  }
+});
+&lt;/script&gt;
+&lt;assettrace-game src="https://&lt;your-game-host&gt;/index.html"
+  utm-source="linkedin" utm-campaign="handover"&gt;&lt;/assettrace-game&gt;</pre>
+
+  <p class="note" style="margin-top:24px">
+    Replace <code>&lt;your-game-host&gt;</code> with your deployment URL
+    (Coolify / Nginx / any static host). Game weighs &lt; 200 KB — loads instantly.
+  </p>
+</body>
+</html>

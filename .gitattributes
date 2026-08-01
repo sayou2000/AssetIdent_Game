@@ -1,0 +1,7 @@
+# Textdateien im Repo immer mit LF speichern — der Container ist Linux, und ohne
+# das produziert jeder Commit von Windows aus CRLF-Rauschen im Diff.
+* text=auto eol=lf
+
+# Binär, nie anfassen
+*.png binary
+*.ico binary

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="AssetTrace: The Handover Quest - 80s Retro-Arcade zum Handover Gap im Facility Management. Typenschilder, Prüffristen, DIN 276, ESG - gegen die Uhr." />
+  <title>AssetTrace: The Handover Quest</title>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       HIER EINTRAGEN, BEVOR DAS SPIEL ONLINE GEHT
+       ──────────────────────────────────────────────────────────────────────
+       1. ASSETTRACE_LANDING  Ziel des "ASSETTRACE LIVE ANSEHEN"-Buttons im
+          Abschlussbildschirm. Das ist der einzige Conversion-Punkt des ganzen
+          Spiels — steht hier die Beispiel-Domain, verpufft die Kampagne.
+       2. OG_URL unten        die öffentliche Adresse des Spiels (für Vorschau-
+          karten in LinkedIn/Slack/WhatsApp).
+       ══════════════════════════════════════════════════════════════════════ -->
+  <script>
+    window.ASSETTRACE_LANDING = "https://assettrace.example.com";  // ← ÄNDERN
+    // Optional: Analytics-Endpunkt, der alle Spielereignisse per POST bekommt.
+    // window.ASSETTRACE_API = "https://api.deine-domain.de/v1/game/events";
+  </script>
+
+  <!-- Vorschaukarte beim Teilen (LinkedIn, Slack, WhatsApp, X) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AssetTrace" />
+  <meta property="og:title" content="AssetTrace: The Handover Quest" />
+  <meta property="og:description" content="Typenschilder im Dunkeln, verbaute Anlagen, DIN 276 unter Zeitdruck — das Retro-Arcade-Spiel zum Handover Gap im Facility Management." />
+  <meta property="og:image" content="og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="de_DE" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="AssetTrace: The Handover Quest" />
+  <meta name="twitter:description" content="Schaffst du die Übergabe, bevor der Termin dich schafft? 3 Ebenen, 17 Anlagen, eine Uhr, die rückwärts läuft." />
+  <meta name="twitter:image" content="og-image.png" />
+  <!-- Favicon als Inline-SVG: keine zusätzliche Datei, kein zusätzlicher Request,
+       scharf in jeder Größe. Synthwave-Sonne über dem Raster, wie im Titelbild. -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230B192C'/%3E%3Cpath d='M6 19a10 10 0 0 1 20 0z' fill='%23FF6B00'/%3E%3Cg fill='%230B192C'%3E%3Crect x='6' y='13' width='20' height='1'/%3E%3Crect x='6' y='15.5' width='20' height='1.5'/%3E%3C/g%3E%3Cg stroke='%2322D3EE' stroke-width='1.4' fill='none'%3E%3Cpath d='M4 22h24'/%3E%3Cpath d='M8 26h4M20 26h4'/%3E%3C/g%3E%3C/svg%3E" />
+  <meta name="theme-color" content="#0B192C" />
+
+  <!-- Der Versionsparameter bricht den Browser-Cache auf. bundle.js und style.css
+       tragen keinen Inhalts-Hash im Namen und werden ein Jahr lang immutable
+       ausgeliefert — ohne ?v= bekämen wiederkehrende Besucher nach einem Update
+       weiterhin die alte Fassung. Bei jedem Release mitziehen (= CFG.VERSION). -->
+  <link rel="stylesheet" href="style.css?v=2.0.0" />
+  <!-- No external fonts: built-in monospace mimics 8-bit terminal feel (zero runtime CDN requests). -->
+</head>
+<body>
+  <!--
+    AssetTrace: The Handover Quest  v2.0
+    Embeddable, dependency-free 80s retro arcade game.
+
+    URL params supported:
+      ?utm_source=linkedin&utm_campaign=handover
+      ?hs=0       -> reset local highscore
+      ?debug=1    -> console event log + window.AssetTrace._dev
+      ?api=<url>  -> POST analytics endpoint
+  -->
+
+  <div id="at-game-root">
+    <div id="at-stage">
+      <canvas id="at-canvas" width="480" height="270" aria-label="AssetTrace The Handover Quest game"></canvas>
+
+      <!-- CRT scanline + vignette overlay -->
+      <div id="at-crt-overlay" aria-hidden="true"></div>
+
+      <!-- HUD -->
+      <div id="at-hud" class="at-hud" aria-live="polite">
+        <div class="at-hud-cell"><span class="at-label">EBENE</span><span id="at-level">01/03</span></div>
+        <div class="at-hud-cell"><span class="at-label">SCORE</span><span id="at-score">000000</span></div>
+        <div class="at-hud-cell"><span class="at-label">DATEN</span><span id="at-data">0/17</span></div>
+        <div class="at-hud-cell"><span class="at-label">QUALITÄT</span><span id="at-qual">100%</span></div>
+        <div class="at-hud-cell at-hud-cell--time"><span class="at-label">ÜBERGABE IN</span><span id="at-time">0:00</span></div>
+      </div>
+
+      <!-- Full-screen overlays (title / briefing / task / report) -->
+      <div id="at-overlay" class="at-overlay at-overlay--visible">
+        <div class="at-panel" id="at-panel-content"><!-- filled by JS --></div>
+      </div>
+
+      <!-- Touch controls (auto-shown on touch devices) -->
+      <div id="at-touch" class="at-touch" aria-hidden="true">
+        <div class="at-dpad">
+          <div class="at-tgroup">
+            <button class="at-tbtn" data-key="left" aria-label="Nach links">&#9664;</button>
+            <button class="at-tbtn" data-key="right" aria-label="Nach rechts">&#9654;</button>
+          </div>
+          <div class="at-tgroup">
+            <button class="at-tbtn at-tbtn--lamp" data-key="lamp" aria-label="Lampe">&#128161;</button>
+            <button class="at-tbtn" data-key="jump" aria-label="Springen">&#9650;</button>
+            <button class="at-tbtn at-tbtn--scan" data-key="scan" aria-label="Scannen">SCAN</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="at-footer" class="at-footer">
+      <span class="at-blink">&#9679;</span>
+      <span id="at-status">SYSTEM READY</span>
+      <span class="at-footer-hint">A/D laufen &middot; W springen &middot; SPACE scannen &middot; F Lampe &middot; 1-4 antworten &middot; M mute</span>
+    </div>
+  </div>
+
+  <script src="bundle.js?v=2.0.0"></script>
+</body>
+</html>

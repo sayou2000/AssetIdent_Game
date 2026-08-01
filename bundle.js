@@ -2716,7 +2716,7 @@
       <button class="at-btn at-btn--ghost" id="at-skip">PROLOG ÜBERSPRINGEN</button>
       <p class="at-dim" style="margin-top:8px">BESTENLISTE</p>
       <div class="at-hs-list">${hsHTML}</div>
-      <p class="at-creditline">EIN PROJEKT VON ${creditLink()}</p>
+      <p class="at-creditline">GEBASTELT VON ${creditLink()}</p>
     `);
     el("at-start").onclick = () => startRun(true);
     el("at-skip").onclick = () => startRun(false);

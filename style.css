@@ -138,6 +138,16 @@ html, body {
   font-size: clamp(11px, 2.8vw, 16px);
   line-height: 1.5;
   letter-spacing: 0.5px;
+  /* Die Bühne ist starr 16:9, ihre Höhe hängt also an der Breite. Gemessen bei
+     500 px Layoutbreite: Bühne 480x270, Panel 425x242 — der Titelinhalt braucht
+     313 px. Ohne das hier wurde er oben und unten abgeschnitten, samt Titel und
+     Startknopf. Horizontal gibt es keinen Überlauf (nachgemessen), overflow-x
+     bleibt trotzdem hidden, damit overflow-y kein Scrollen quer erlaubt. */
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  min-width: 0;
 }
 .at-panel h1 {
   font-size: clamp(16px, 5.2vw, 34px);
@@ -544,6 +554,21 @@ body.at-touch-device .at-touch {
 }
 #at-status { color: var(--at-green); }
 .at-footer-hint { color: var(--at-dim); }
+
+/* Pflichtlinks: leise, aber immer da. Werden bewusst nicht mit dem
+   Steuerungshinweis zusammen ausgeblendet — sie müssen ständig erreichbar sein. */
+.at-legal { color: var(--at-dim); white-space: nowrap; }
+.at-legal a {
+  color: var(--at-dim);
+  text-decoration: none;
+  border-bottom: 1px dotted currentColor;
+  transition: color 0.12s;
+}
+.at-legal a:hover, .at-legal a:focus-visible {
+  color: var(--at-cyan);
+  border-bottom-style: solid;
+}
+.at-legal-sep { margin: 0 4px; opacity: 0.6; }
 .at-blink {
   color: var(--at-green);
   animation: at-blink 1s steps(2) infinite;
@@ -566,4 +591,13 @@ body.at-touch-device .at-touch {
   .at-hud { font-size: 8px; letter-spacing: 0; }
   .at-hud-cell { min-width: 0; padding: 1px 3px; }
   .at-footer-hint { display: none; }
+  /* .at-legal bleibt sichtbar — Pflichtangaben müssen ständig erreichbar sein */
+
+  /* Auf der schmalen Bühne zählt jede Zeile: Überschriften und Abstände kleiner,
+     damit das Titelpanel möglichst ohne Scrollen hineinpasst. */
+  .at-panel { font-size: 11px; line-height: 1.4; }
+  .at-panel h1 { font-size: 22px; letter-spacing: 1px; }
+  .at-panel h2 { font-size: 14px; margin: 3px 0 5px; }
+  .at-panel p { margin: 2px 0; }
+  .at-btn { padding: 6px 12px; margin: 6px 3px 0; }
 }
